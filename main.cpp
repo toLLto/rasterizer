@@ -1,13 +1,19 @@
-// Header file for input output functions
 #include <iostream>
+#include "Buffer.hpp"
+#include "Rasterizer.hpp"
+
 using namespace std;
 
-// main() function: where the execution of
-// C++ program begins
-int main() {
+const unsigned int WIDTH = 256;
+const unsigned int HEIGHT = 256;
 
-    // This statement prints "Hello World"
-    cout << "Hello World";
+int main() 
+{
+    Rasterizer::Buffer buffer(WIDTH, HEIGHT);
+
+    Rasterizer::Rasterizer rasterizer(WIDTH, HEIGHT);
+
+    rasterizer.Render(0xFFFF0000);
 
     return 0;
 }
