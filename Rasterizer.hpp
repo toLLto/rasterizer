@@ -15,7 +15,11 @@ namespace Rasterizer
 	public:
 		Rasterizer(unsigned int width, unsigned int height);
 
-		void Render(unsigned int backgroundColor);
+		void Render(Triangle triangle, unsigned int triangleColor, unsigned int backgroundColor);
 		void Clear(unsigned int color = 0);
+
+	private:
+		void RenderTriangle(const Triangle triangle, unsigned int color);
 	};
 }
+
