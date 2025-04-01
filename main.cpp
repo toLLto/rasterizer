@@ -7,14 +7,14 @@ using namespace std;
 const unsigned int WIDTH = 256;
 const unsigned int HEIGHT = 256;
 
-const unsigned int BLACK = 0xFF000000;
-const unsigned int WHITE = 0xFFFFFFFF;
-const unsigned int RED = 0xFFFF0000;
-const unsigned int GREEN = 0xFF00FF00;
-const unsigned int BLUE = 0xFF0000FF;
-const unsigned int YELLOW = 0xFFFFFF00;
-const unsigned int MAGENTA = 0xFFFF00FF;
-const unsigned int CYAN = 0xFF00FFFF;
+const unsigned int BLACK    = 0xFF000000;
+const unsigned int WHITE    = 0xFFFFFFFF;
+const unsigned int RED      = 0xFFFF0000;
+const unsigned int GREEN    = 0xFF00FF00;
+const unsigned int BLUE     = 0xFF0000FF;
+const unsigned int YELLOW   = 0xFFFFFF00;
+const unsigned int MAGENTA  = 0xFFFF00FF;
+const unsigned int CYAN     = 0xFF00FFFF;
 
 int main() 
 {
