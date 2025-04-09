@@ -1,7 +1,7 @@
 #include "Color.hpp"
 #include "RasTerX/include/MathUtils.hpp"
 
-Color::Color() : r(0), g(0), b(0), a(0)
+Color::Color() : r(0), g(0), b(0), a(0xFF)
 {
 }
 
@@ -29,12 +29,11 @@ Color::Color(unsigned int hex)
 	b = hex & 0xFF;
 }
 
-Color::Color(rtx::Vector3 v, float a)
+Color::Color(rtx::Vector3 v, const float a) : a(static_cast<unsigned char>(rtx::MathUtils::Clamp(a, 0.0f, 1.0f) * 255))
 {
 	r = static_cast<unsigned char>(rtx::MathUtils::Clamp(v.x, 0.0f, 1.0f) * 255);
 	g = static_cast<unsigned char>(rtx::MathUtils::Clamp(v.y, 0.0f, 1.0f) * 255);
 	b = static_cast<unsigned char>(rtx::MathUtils::Clamp(v.z, 0.0f, 1.0f) * 255);
-	a = static_cast<unsigned char>(rtx::MathUtils::Clamp(a, 0.0f, 1.0f) * 255);
 }
 
 unsigned int Color::ToHex() const

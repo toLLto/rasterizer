@@ -15,9 +15,9 @@ struct Color
 
 	Color();
 	Color(int r, int g, int b, int a = 255);
-	Color(float r, float g, float b, float a = 1.0f);
+	explicit Color(float r, float g, float b, float a = 1.0f);
 	Color(unsigned int hex);
-	Color(rtx::Vector3 v, float a = 1.0f);
+	Color(rtx::Vector3 v, const float a = 1.0f);
 
 	unsigned int ToHex() const;
 

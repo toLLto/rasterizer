@@ -79,9 +79,9 @@ void Rasterizer::Rasterizer::RenderTriangle(const Triangle triangle, unsigned in
 				float v = (cady * scdx + acdx * scdy) * vDenominator;
 				float w = 1.f - u - v;
 
-				Color pColor(Color(RED).ToVector() * u + Color(GREEN).ToVector() * v + Color(BLUE).ToVector() * w);
+				Vector3 pColor = Color(RED).ToVector() * u + Color(GREEN).ToVector() * v + Color(BLUE).ToVector() * w;
 
-				colorBuffer.SetPixel(x, y, pColor.ToHex());
+				colorBuffer.SetPixel(x, y, Color(pColor).ToHex());
 			}
 		}
 	}
