@@ -15,7 +15,7 @@ namespace Rasterizer
 	public:
 		Rasterizer(unsigned int width, unsigned int height);
 
-		void Render(Triangle triangle, unsigned int triangleColor, unsigned int backgroundColor);
+		void Render(const std::vector<Triangle> triangles, unsigned int backgroundColor);
 		void Clear(unsigned int color = 0);
 
 	private:
