@@ -16,6 +16,11 @@ unsigned int Rasterizer::Buffer::GetPixel(unsigned int x, unsigned int y) const
 
 void Rasterizer::Buffer::SetPixel(unsigned int x, unsigned int y, unsigned int color)
 {
+	if (x < 0 || x >= width || y < 0 || y >= height)
+	{
+		return;
+	}
+
 	colorBuffer[x + width * y] = color;
 }
 
