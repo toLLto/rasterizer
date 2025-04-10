@@ -11,6 +11,7 @@ namespace Rasterizer
 		const unsigned int height;
 
 		std::vector<unsigned int> colorBuffer;
+		std::vector<float> depthBuffer;
 
 	public:
 		Buffer(unsigned int width, unsigned int height);
@@ -19,14 +20,17 @@ namespace Rasterizer
 		unsigned int GetWidth() const { return width; }
 		unsigned int GetHeight() const { return height; }
 
-		unsigned int GetPixel(unsigned int x, unsigned int y) const;
-		void SetPixel(unsigned int x, unsigned int y, unsigned int color);
+		unsigned int GetPixelColor(unsigned int x, unsigned int y) const;
+		void SetPixelColor(unsigned int x, unsigned int y, unsigned int color);
+
+		float GetPixelDepth(unsigned int x, unsigned int y) const;
+		void SetPixelDepth(unsigned int x, unsigned int y, float depth);
 
 		const std::vector<unsigned int>& GetColorBuffer() { return colorBuffer; }
+		const std::vector<float>& GetDepthBuffer() { return depthBuffer; }
 
 		void SetBufferColorFill(unsigned int color);
-
-		
+		void SetBufferDepthFill(float depth);
 	};
 }
 
