@@ -2,9 +2,17 @@
 #include "RasTerX/include/MathUtils.hpp"
 #include "TGA.hpp"
 #include "Color.hpp"
+#include "RasTerX/include/Matrix4.hpp"
+#include "VertexProcessor.hpp"
 
 
-Rasterizer::Rasterizer::Rasterizer(unsigned int width, unsigned int height) : buffer(width, height)
+Rasterizer::Rasterizer::Rasterizer(unsigned int width, unsigned int height, float fov, float aspect) 
+	: buffer(width, height), fov(fov), aspect(aspect)
+{
+}
+
+Rasterizer::Rasterizer::Rasterizer(unsigned int width, unsigned int height, float fov, float aspect, float near, float far) 
+	: buffer(width, height), fov(fov), aspect(aspect), near(near), far(far)
 {
 }
 
@@ -18,7 +26,7 @@ void Rasterizer::Rasterizer::Render(const std::vector<Triangle> triangles, unsig
 		RenderTriangle(tr, 0xFFFFFFFF);
 	}
 
-	TGA::Save("miagk_4.tga", buffer.GetColorBuffer(), buffer.GetWidth(), buffer.GetHeight());
+	TGA::Save("miagk_5.tga", buffer.GetColorBuffer(), buffer.GetWidth(), buffer.GetHeight());
 }
 
 void Rasterizer::Rasterizer::ClearBufferColor(unsigned int color)
@@ -36,16 +44,23 @@ void Rasterizer::Rasterizer::RenderTriangle(const Triangle triangle, unsigned in
 	int width = buffer.GetWidth();
 	int height = buffer.GetHeight();
 
-	int ax = (triangle.GetVertA().x + 1.f) * width * 0.5f;
-	int ay = (triangle.GetVertA().y + 1.f) * height * 0.5f;
+	Matrix4 camera;
+	camera.LoadIdentity();
+	camera = camera.Mul(VertexProcessor::SetPerspective(fov, aspect, near, far));
+
+	Vector4 a = camera * Vector4(triangle.GetVertA(), 1.f);
+	int ax = (a.x + 1.f) * width * 0.5f;
+	int ay = (a.y + 1.f) * height * 0.5f;
 	float az = triangle.GetVertA().z;
 
-	int bx = (triangle.GetVertB().x + 1.f) * width * 0.5f;
-	int by = (triangle.GetVertB().y + 1.f) * height * 0.5f;
+	Vector4 b = camera * Vector4(triangle.GetVertB(), 1.f);
+	int bx = (b.x + 1.f) * width * 0.5f;
+	int by = (b.y + 1.f) * height * 0.5f;
 	float bz = triangle.GetVertB().z;
 
-	int cx = (triangle.GetVertC().x + 1.f) * width * 0.5f;
-	int cy = (triangle.GetVertC().y + 1.f) * height * 0.5f;
+	Vector4 c = camera * Vector4(triangle.GetVertC(), 1.f);
+	int cx = (c.x + 1.f) * width * 0.5f;
+	int cy = (c.y + 1.f) * height * 0.5f;
 	float cz = triangle.GetVertC().z;
 
 	int xMin = std::max(MathUtils::Min3<int>(ax, bx, cx), 0);

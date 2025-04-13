@@ -8,11 +8,14 @@ using namespace std;
 const unsigned int WIDTH = 256;
 const unsigned int HEIGHT = 256;
 
+const float fov = 120.f;
+const float aspect = 1.f;
+
 int main() 
 {
     Rasterizer::Buffer buffer(WIDTH, HEIGHT);
 
-    Rasterizer::Rasterizer rasterizer(WIDTH, HEIGHT);
+    Rasterizer::Rasterizer rasterizer(WIDTH, HEIGHT, fov, aspect);
 
     Triangle triangle1(
         Vector3(0.7f, 0.5f, 0.f),

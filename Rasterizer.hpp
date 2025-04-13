@@ -11,9 +11,14 @@ namespace Rasterizer
 	{
 	private:
 		Buffer buffer;
+		float fov;
+		float aspect;
+		float near = 0.01f;
+		float far = 100.f;
 
 	public:
-		Rasterizer(unsigned int width, unsigned int height);
+		Rasterizer(unsigned int width, unsigned int height, float fov, float aspect);
+		Rasterizer(unsigned int width, unsigned int height, float fov, float aspect, float near, float far);
 
 		void Render(const std::vector<Triangle> triangles, unsigned int backgroundColor);
 		void ClearBufferColor(unsigned int color = 0);

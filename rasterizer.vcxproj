@@ -141,6 +141,7 @@
     <ClCompile Include="RasTerX\src\Vector3.cpp" />
     <ClCompile Include="RasTerX\src\Vector4.cpp" />
     <ClCompile Include="TGA.cpp" />
+    <ClCompile Include="VertexProcessor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Buffer.hpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="RasTerX\include\Vector3.hpp" />
     <ClInclude Include="RasTerX\include\Vector4.hpp" />
     <ClInclude Include="TGA.hpp" />
+    <ClInclude Include="VertexProcessor.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
