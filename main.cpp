@@ -2,6 +2,8 @@
 #include "Buffer.hpp"
 #include "Rasterizer.hpp"
 #include "Color.hpp"
+#include "RasTerX/include/Matrix4.hpp"
+#include "VertexProcessor.hpp"
 
 using namespace std;
 
@@ -13,9 +15,15 @@ const float aspect = 1.f;
 
 int main() 
 {
-    Rasterizer::Buffer buffer(WIDTH, HEIGHT);
+    Buffer buffer(WIDTH, HEIGHT);
 
-    Rasterizer::Rasterizer rasterizer(WIDTH, HEIGHT, fov, aspect);
+    Matrix4 model;
+    model.LoadIdentity();
+    model = model * VertexProcessor::Scale(rtx::Vector3(2.f, 2.f, 2.f));
+    model = model * VertexProcessor::Rotate(-45.f, rtx::Vector3(0.f, 0.f, 1.f));
+    model = model * VertexProcessor::Translate(rtx::Vector3(-10.f, 0.5f, 0.f));
+
+    Rasterizer rasterizer(WIDTH, HEIGHT, fov, aspect);
 
     Triangle triangle1(
         Vector3(0.7f, 0.5f, 0.f),
@@ -59,7 +67,7 @@ int main()
         Vector3(0.f, -0.8f, 0.f)
     );
 
-    rasterizer.Render({ triangle1, triangle2, triangle3, triangle4, triangle5, triangle6, triangle7 }, BLACK);
+    rasterizer.Render({ triangle1, triangle2, triangle3, triangle4, triangle5, triangle6, triangle7 }, model, BLACK);
 
     return 0;
 }

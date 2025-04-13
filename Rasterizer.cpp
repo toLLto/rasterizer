@@ -2,63 +2,59 @@
 #include "RasTerX/include/MathUtils.hpp"
 #include "TGA.hpp"
 #include "Color.hpp"
-#include "RasTerX/include/Matrix4.hpp"
 #include "VertexProcessor.hpp"
 
-
-Rasterizer::Rasterizer::Rasterizer(unsigned int width, unsigned int height, float fov, float aspect) 
-	: buffer(width, height), fov(fov), aspect(aspect)
+Rasterizer::Rasterizer(unsigned int width, unsigned int height, float fov, float aspect, float near, float far)
+	: buffer(width, height), fov(fov), aspect(aspect), near(near), far(far) 
 {
 }
 
-Rasterizer::Rasterizer::Rasterizer(unsigned int width, unsigned int height, float fov, float aspect, float near, float far) 
-	: buffer(width, height), fov(fov), aspect(aspect), near(near), far(far)
-{
-}
-
-void Rasterizer::Rasterizer::Render(const std::vector<Triangle> triangles, unsigned int backgroundColor)
+void Rasterizer::Render(const std::vector<Triangle>& triangles, const rtx::Matrix4& model, unsigned int backgroundColor)
 {
 	buffer.SetBufferColorFill(backgroundColor);
 	buffer.SetBufferDepthFill(FLT_MAX);
 
 	for (const Triangle& tr : triangles)
 	{
-		RenderTriangle(tr, 0xFFFFFFFF);
+		RenderTriangle(tr, model, 0xFFFFFFFF);
 	}
 
-	TGA::Save("miagk_5.tga", buffer.GetColorBuffer(), buffer.GetWidth(), buffer.GetHeight());
+	TGA::Save("miagk_6.tga", buffer.GetColorBuffer(), buffer.GetWidth(), buffer.GetHeight());
 }
 
-void Rasterizer::Rasterizer::ClearBufferColor(unsigned int color)
+void Rasterizer::ClearBufferColor(unsigned int color)
 {
 	buffer.SetBufferColorFill(color);
 }
 
-void Rasterizer::Rasterizer::ClearBufferDepth(float depth)
+void Rasterizer::ClearBufferDepth(float depth)
 {
 	buffer.SetBufferDepthFill(depth);
 }
 
-void Rasterizer::Rasterizer::RenderTriangle(const Triangle triangle, unsigned int color)
+void Rasterizer::RenderTriangle(const Triangle triangle, const rtx::Matrix4& model, unsigned int color)
 {
 	int width = buffer.GetWidth();
 	int height = buffer.GetHeight();
 
+	Matrix4 projection = VertexProcessor::SetPerspective(fov, aspect, near, far);
+	Matrix4 view = VertexProcessor::SetLookAt(Vector3::Forward(), Vector3::Zero(), Vector3::Up());
+
 	Matrix4 camera;
 	camera.LoadIdentity();
-	camera = camera.Mul(VertexProcessor::SetPerspective(fov, aspect, near, far));
+	camera = camera * projection * view;
 
-	Vector4 a = camera * Vector4(triangle.GetVertA(), 1.f);
+	Vector4 a = model * camera * Vector4(triangle.GetVertA(), 1.f);
 	int ax = (a.x + 1.f) * width * 0.5f;
 	int ay = (a.y + 1.f) * height * 0.5f;
 	float az = triangle.GetVertA().z;
 
-	Vector4 b = camera * Vector4(triangle.GetVertB(), 1.f);
+	Vector4 b = model * camera * Vector4(triangle.GetVertB(), 1.f);
 	int bx = (b.x + 1.f) * width * 0.5f;
 	int by = (b.y + 1.f) * height * 0.5f;
 	float bz = triangle.GetVertB().z;
 
-	Vector4 c = camera * Vector4(triangle.GetVertC(), 1.f);
+	Vector4 c = model * camera * Vector4(triangle.GetVertC(), 1.f);
 	int cx = (c.x + 1.f) * width * 0.5f;
 	int cy = (c.y + 1.f) * height * 0.5f;
 	float cz = triangle.GetVertC().z;
