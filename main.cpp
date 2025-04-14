@@ -19,9 +19,9 @@ int main()
 
     Matrix4 model;
     model.LoadIdentity();
-    model = model * VertexProcessor::Scale(rtx::Vector3(2.f, 2.f, 2.f));
-    model = model * VertexProcessor::Rotate(-45.f, rtx::Vector3(0.f, 0.f, 1.f));
-    model = model * VertexProcessor::Translate(rtx::Vector3(-10.f, 0.5f, 0.f));
+    model = model * VertexProcessor::Scale(rtx::Vector3(0.5f, 0.5f, 0.5f));
+    model = model * VertexProcessor::Rotate(60.f, rtx::Vector3(0.f, 0.f, -1.f));
+    model = model * VertexProcessor::Translate(rtx::Vector3(5.f, -0.7f, 0.f));
 
     Rasterizer rasterizer(WIDTH, HEIGHT, fov, aspect);
 

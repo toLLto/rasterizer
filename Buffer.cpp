@@ -27,6 +27,11 @@ void Buffer::SetPixelColor(unsigned int x, unsigned int y, unsigned int color)
 
 float Buffer::GetPixelDepth(unsigned int x, unsigned int y) const
 {
+	if (x < 0 || x >= width || y < 0 || y >= height)
+	{
+		return FLT_MAX;
+	}
+
 	return depthBuffer[x + width * y];
 }
 
