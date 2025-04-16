@@ -19,7 +19,7 @@ void Rasterizer::Render(const std::vector<Triangle>& triangles, const rtx::Matri
 		RenderTriangle(tr, model, 0xFFFFFFFF);
 	}
 
-	TGA::Save("miagk_6.tga", buffer.GetColorBuffer(), buffer.GetWidth(), buffer.GetHeight());
+	TGA::Save("miagk_7.tga", buffer.GetColorBuffer(), buffer.GetWidth(), buffer.GetHeight());
 }
 
 void Rasterizer::ClearBufferColor(unsigned int color)
