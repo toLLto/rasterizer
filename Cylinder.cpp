@@ -24,7 +24,7 @@ Cylinder::Cylinder(const float radius, const float height, const int radialSegme
 		Vertex sideVertC(baseCirclePoint1, sideNormal1);
 		Vertex sideVertD(topCirclePoint1, sideNormal1);
 
-		VTriangle sideTriangle1(sideVertA, sideVertB, sideVertC);
+		VTriangle sideTriangle1(sideVertB, sideVertA, sideVertC);
 		VTriangle sideTriangle2(sideVertB, sideVertC, sideVertD);
 
 		tris.emplace_back(sideTriangle1);

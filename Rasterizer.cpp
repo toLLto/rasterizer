@@ -9,14 +9,14 @@ Rasterizer::Rasterizer(unsigned int width, unsigned int height, float fov, float
 {
 }
 
-void Rasterizer::Render(const std::vector<Triangle>& triangles, const rtx::Matrix4& model, unsigned int backgroundColor)
+void Rasterizer::Render(std::vector<Mesh>& meshes, const std::vector<rtx::Matrix4>& models, unsigned int backgroundColor)
 {
 	buffer.SetBufferColorFill(backgroundColor);
 	buffer.SetBufferDepthFill(FLT_MAX);
 
-	for (const Triangle& tr : triangles)
+	for (int i = 0; i < meshes.size(); ++i)
 	{
-		RenderTriangle(tr, model, 0xFFFFFFFF);
+		RenderMesh(meshes[i], models[i]);
 	}
 
 	TGA::Save("miagk_7.tga", buffer.GetColorBuffer(), buffer.GetWidth(), buffer.GetHeight());
@@ -32,7 +32,15 @@ void Rasterizer::ClearBufferDepth(float depth)
 	buffer.SetBufferDepthFill(depth);
 }
 
-void Rasterizer::RenderTriangle(const Triangle triangle, const rtx::Matrix4& model, unsigned int color)
+void Rasterizer::RenderMesh(Mesh mesh, const rtx::Matrix4& model)
+{
+	for (VTriangle& tr : mesh.GetTris())
+	{
+		RenderTriangle(tr, model, RED);
+	}
+}
+
+void Rasterizer::RenderTriangle(VTriangle triangle, const rtx::Matrix4& model, unsigned int color)
 {
 	int width = buffer.GetWidth();
 	int height = buffer.GetHeight();
@@ -44,20 +52,20 @@ void Rasterizer::RenderTriangle(const Triangle triangle, const rtx::Matrix4& mod
 	camera.LoadIdentity();
 	camera = camera * projection * view;
 
-	Vector4 a = model * camera * Vector4(triangle.GetVertA(), 1.f);
+	Vector4 a = model * camera * Vector4(triangle.GetVertexA().GetPosition(), 1.f);
 	int ax = (a.x + 1.f) * width * 0.5f;
 	int ay = (a.y + 1.f) * height * 0.5f;
-	float az = triangle.GetVertA().z;
+	float az = triangle.GetVertexA().GetPosition().z;
 
-	Vector4 b = model * camera * Vector4(triangle.GetVertB(), 1.f);
+	Vector4 b = model * camera * Vector4(triangle.GetVertexB().GetPosition(), 1.f);
 	int bx = (b.x + 1.f) * width * 0.5f;
 	int by = (b.y + 1.f) * height * 0.5f;
-	float bz = triangle.GetVertB().z;
+	float bz = triangle.GetVertexB().GetPosition().z;
 
-	Vector4 c = model * camera * Vector4(triangle.GetVertC(), 1.f);
+	Vector4 c = model * camera * Vector4(triangle.GetVertexC().GetPosition(), 1.f);
 	int cx = (c.x + 1.f) * width * 0.5f;
 	int cy = (c.y + 1.f) * height * 0.5f;
-	float cz = triangle.GetVertC().z;
+	float cz = triangle.GetVertexC().GetPosition().z;
 
 	int xMin = std::max(MathUtils::Min3<int>(ax, bx, cx), 0);
 	int yMin = std::max(MathUtils::Min3<int>(ay, by, cy), 0);

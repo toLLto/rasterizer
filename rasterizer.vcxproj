@@ -129,7 +129,10 @@
   <ItemGroup>
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Color.cpp" />
+    <ClCompile Include="Cone.cpp" />
+    <ClCompile Include="Cylinder.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Rasterizer.cpp" />
     <ClCompile Include="RasTerX\src\Matrix3.cpp" />
     <ClCompile Include="RasTerX\src\Matrix4.cpp" />
@@ -141,11 +144,17 @@
     <ClCompile Include="RasTerX\src\Vector3.cpp" />
     <ClCompile Include="RasTerX\src\Vector4.cpp" />
     <ClCompile Include="TGA.cpp" />
+    <ClCompile Include="Torus.cpp" />
+    <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="VertexProcessor.cpp" />
+    <ClCompile Include="VTriangle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Buffer.hpp" />
     <ClInclude Include="Color.hpp" />
+    <ClInclude Include="Cone.hpp" />
+    <ClInclude Include="Cylinder.hpp" />
+    <ClInclude Include="Mesh.hpp" />
     <ClInclude Include="Rasterizer.hpp" />
     <ClInclude Include="RasTerX\include\MathUtils.hpp" />
     <ClInclude Include="RasTerX\include\Matrix3.hpp" />
@@ -158,7 +167,10 @@
     <ClInclude Include="RasTerX\include\Vector3.hpp" />
     <ClInclude Include="RasTerX\include\Vector4.hpp" />
     <ClInclude Include="TGA.hpp" />
+    <ClInclude Include="Torus.hpp" />
+    <ClInclude Include="Vertex.hpp" />
     <ClInclude Include="VertexProcessor.hpp" />
+    <ClInclude Include="VTriangle.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

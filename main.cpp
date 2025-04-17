@@ -4,6 +4,9 @@
 #include "Color.hpp"
 #include "RasTerX/include/Matrix4.hpp"
 #include "VertexProcessor.hpp"
+#include "Cone.hpp"
+#include "Cylinder.hpp"
+#include "Torus.hpp"
 
 using namespace std;
 
@@ -17,57 +20,40 @@ int main()
 {
     Buffer buffer(WIDTH, HEIGHT);
 
-    Matrix4 model;
-    model.LoadIdentity();
-    model = model * VertexProcessor::Scale(rtx::Vector3(0.5f, 0.5f, 0.5f));
-    model = model * VertexProcessor::Rotate(60.f, rtx::Vector3(0.f, 0.f, -1.f));
-    model = model * VertexProcessor::Translate(rtx::Vector3(5.f, -0.7f, 0.f));
-
     Rasterizer rasterizer(WIDTH, HEIGHT, fov, aspect);
 
-    Triangle triangle1(
-        Vector3(0.7f, 0.5f, 0.f),
-        Vector3(1.3f, -0.5f, 0.f),
-        Vector3(0.1f, -0.5f, 0.f)
-    );
+    std::vector<Mesh> meshes;
+    std::vector<rtx::Matrix4> models;
 
-    Triangle triangle2(
-        Vector3(-0.9f, 0.9f, 0.f),
-        Vector3(0.8f, 0.75f, 0.f),
-        Vector3(0.1f, 0.6f, 0.f)
-    );
+    Cone cone(0.4f, 2.f, 12);
+    rtx::Matrix4 coneModel;
+    coneModel.LoadIdentity();
+    coneModel = coneModel 
+        * VertexProcessor::Translate(rtx::Vector3(40.f, 0.f, 0.f))
+        * VertexProcessor::Rotate(-15.f, rtx::Vector3::Forward())
+        * VertexProcessor::Rotate(60.f, rtx::Vector3::Right());
+    meshes.emplace_back(cone);
+    models.emplace_back(coneModel);
 
-    Triangle triangle3(
-        Vector3(0.1f, 0.5f, 0.3f),
-        Vector3(1.3f, 0.5f, 0.3f),
-        Vector3(0.7f, -0.5f, 0.3f)
-    );
+    Cylinder cylinder(0.5, 1.5f, 0, 0, 24);
+    rtx::Matrix4 cylinderModel;
+    cylinderModel.LoadIdentity();
+    cylinderModel = cylinderModel * VertexProcessor::Translate(rtx::Vector3(10.f, -30.f, 0.f));
+    meshes.emplace_back(cylinder);
+    models.emplace_back(cylinderModel);
 
-    Triangle triangle4(
-        Vector3(-0.8f, 0.5f, 0.f),
-        Vector3(-0.5f, 0.f, 0.f),
-        Vector3(-0.8f, 0.f, 0.f)
-    );
+    Torus torus(0.4f, 0.3f, 12, 10);
+    rtx::Matrix4 torusModel;
+    torusModel.LoadIdentity();
+    torusModel = torusModel 
+        * VertexProcessor::Translate(rtx::Vector3(-25.f, 25.f, 0.f))
+        * VertexProcessor::Rotate(-60.f, rtx::Vector3::Forward())
+        * VertexProcessor::Rotate(-30.f, rtx::Vector3::Right()) ;
+    meshes.emplace_back(torus);
+    models.emplace_back(torusModel);
 
-    Triangle triangle5(
-        Vector3(-0.8f, 0.f, 0.f),
-        Vector3(-0.5f, 0.f, 0.f),
-        Vector3(-0.8f, -0.5f, 0.f)
-    );
 
-    Triangle triangle6(
-        Vector3(-0.4f, -0.6f, 0.f),
-        Vector3(0.f, -0.6f, 0.f),
-        Vector3(-0.4f, -0.8f, 0.f)
-    );
-
-    Triangle triangle7(
-        Vector3(-0.4f, -0.8f, 0.f),
-        Vector3(0.f, -0.6f, 0.f),
-        Vector3(0.f, -0.8f, 0.f)
-    );
-
-    rasterizer.Render({ triangle1, triangle2, triangle3, triangle4, triangle5, triangle6, triangle7 }, model, BLACK);
+    rasterizer.Render(meshes, models, BLACK);
 
     return 0;
 }

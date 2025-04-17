@@ -1,3 +1,5 @@
+#pragma once
+
 #include "RasTerX/include/Vector3.hpp"
 
 const unsigned int BLACK = 0xFF000000;

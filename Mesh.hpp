@@ -18,5 +18,7 @@ public:
 	Mesh() = default;
 	virtual ~Mesh() = default;
 
+	std::vector<VTriangle> GetTris();
+
 	static rtx::Vector3 CirclePoint(const float angle, const float radius, rtx::Vector3 center = rtx::Vector3::Zero());
 };
