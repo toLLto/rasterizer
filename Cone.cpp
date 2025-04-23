@@ -10,15 +10,20 @@ Cone::Cone(const float radius, const float height, const int distribution)
 		rtx::Vector3 circlePoint1 = Mesh::CirclePoint(i, radius);
 		rtx::Vector3 circlePoint2 = Mesh::CirclePoint(i + step, radius);
 
-		Vertex sideVertA(circlePoint2);
+		rtx::Vector3 sideNormal = (circlePoint2 - circlePoint1).Cross(rtx::Vector3(0.f, -height, 0.f)).Normal();
+
+		Vertex sideVertA(circlePoint2, sideNormal);
 		Vertex sideVertB(rtx::Vector3(0.f, height, 0.f));
-		Vertex sideVertC(circlePoint1);
+		Vertex sideVertC(circlePoint1, sideNormal);
 		VTriangle sideTriangle(sideVertA, sideVertB, sideVertC);
 		tris.emplace_back(sideTriangle);
 
-		Vertex baseVertA(circlePoint1);
-		Vertex baseVertB(rtx::Vector3::Zero());
-		Vertex baseVertC(circlePoint2);
+		Vertex baseVertA(circlePoint1, sideNormal);
+		Vertex baseVertB(rtx::Vector3::Zero(), -rtx::Vector3::Up());
+		Vertex baseVertC(circlePoint2, sideNormal);
 		VTriangle baseTriangle(baseVertA, baseVertB, baseVertC);
+		tris.emplace_back(baseTriangle);
 	}
+
+	verts.push_back({ rtx::Vector3(0.f, height, 0.f), -rtx::Vector3::Up()});
 }

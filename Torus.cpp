@@ -50,8 +50,8 @@ rtx::Vector3 Torus::CalculateNormal(const rtx::Vector3& point, const float outer
 	float normal = std::sqrt(point.x * point.x + point.y * point.y);
 
 	return rtx::Vector3(
-		point.x * innerRadius / normal,
-		point.y * innerRadius / normal,
-		point.z * outerRadius / normal
+		point.x / normal,
+		point.y / normal,
+		point.z / outerRadius
 	);
 }

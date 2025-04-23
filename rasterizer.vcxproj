@@ -131,8 +131,11 @@
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="Cone.cpp" />
     <ClCompile Include="Cylinder.cpp" />
+    <ClCompile Include="DirectionalLight.cpp" />
+    <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="Rasterizer.cpp" />
     <ClCompile Include="RasTerX\src\Matrix3.cpp" />
     <ClCompile Include="RasTerX\src\Matrix4.cpp" />
@@ -143,6 +146,7 @@
     <ClCompile Include="RasTerX\src\Triangle.cpp" />
     <ClCompile Include="RasTerX\src\Vector3.cpp" />
     <ClCompile Include="RasTerX\src\Vector4.cpp" />
+    <ClCompile Include="SpotLight.cpp" />
     <ClCompile Include="TGA.cpp" />
     <ClCompile Include="Torus.cpp" />
     <ClCompile Include="Vertex.cpp" />
@@ -154,7 +158,10 @@
     <ClInclude Include="Color.hpp" />
     <ClInclude Include="Cone.hpp" />
     <ClInclude Include="Cylinder.hpp" />
+    <ClInclude Include="DirectionalLight.hpp" />
+    <ClInclude Include="Light.hpp" />
     <ClInclude Include="Mesh.hpp" />
+    <ClInclude Include="PointLight.hpp" />
     <ClInclude Include="Rasterizer.hpp" />
     <ClInclude Include="RasTerX\include\MathUtils.hpp" />
     <ClInclude Include="RasTerX\include\Matrix3.hpp" />
@@ -166,6 +173,7 @@
     <ClInclude Include="RasTerX\include\Triangle.hpp" />
     <ClInclude Include="RasTerX\include\Vector3.hpp" />
     <ClInclude Include="RasTerX\include\Vector4.hpp" />
+    <ClInclude Include="SpotLight.hpp" />
     <ClInclude Include="TGA.hpp" />
     <ClInclude Include="Torus.hpp" />
     <ClInclude Include="Vertex.hpp" />
