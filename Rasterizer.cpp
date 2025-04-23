@@ -3,23 +3,26 @@
 #include "TGA.hpp"
 #include "Color.hpp"
 #include "VertexProcessor.hpp"
+#include "PointLight.hpp"
+#include "DirectionalLight.hpp"
+#include "SpotLight.hpp"
 
 Rasterizer::Rasterizer(unsigned int width, unsigned int height, float fov, float aspect, float near, float far)
 	: buffer(width, height), fov(fov), aspect(aspect), near(near), far(far) 
 {
 }
 
-void Rasterizer::Render(std::vector<Mesh>& meshes, const std::vector<rtx::Matrix4>& models, unsigned int backgroundColor)
+void Rasterizer::Render(std::vector<Mesh>& meshes, const std::vector<rtx::Matrix4>& models, const std::vector<std::shared_ptr<Light>>& lights, unsigned int backgroundColor)
 {
 	buffer.SetBufferColorFill(backgroundColor);
 	buffer.SetBufferDepthFill(FLT_MAX);
 
 	for (int i = 0; i < meshes.size(); ++i)
 	{
-		RenderMesh(meshes[i], models[i]);
+		RenderMesh(meshes[i], models[i], lights);
 	}
 
-	TGA::Save("miagk_7.tga", buffer.GetColorBuffer(), buffer.GetWidth(), buffer.GetHeight());
+	TGA::Save("miagk_8.tga", buffer.GetColorBuffer(), buffer.GetWidth(), buffer.GetHeight());
 }
 
 void Rasterizer::ClearBufferColor(unsigned int color)
@@ -32,15 +35,84 @@ void Rasterizer::ClearBufferDepth(float depth)
 	buffer.SetBufferDepthFill(depth);
 }
 
-void Rasterizer::RenderMesh(Mesh mesh, const rtx::Matrix4& model)
+void Rasterizer::RenderMesh(Mesh mesh, const rtx::Matrix4& model, const std::vector<std::shared_ptr<Light>>& lights)
 {
 	for (VTriangle& tr : mesh.GetTris())
 	{
-		RenderTriangle(tr, model, RED);
+		VTriangle vTr = tr;
+
+		LightCalculation(vTr.GetVertexA(), lights);
+		LightCalculation(vTr.GetVertexB(), lights);
+		LightCalculation(vTr.GetVertexC(), lights);
+
+		RenderTriangle(vTr, model, lights, RED);
 	}
 }
 
-void Rasterizer::RenderTriangle(VTriangle triangle, const rtx::Matrix4& model, unsigned int color)
+void Rasterizer::LightCalculation(Vertex& vert, const std::vector<std::shared_ptr<Light>>& lights)
+{
+	Vector3 objColor = Color(vert.GetColor()).ToVector();
+	Vector3 camPos = rtx::Vector3::Zero();
+	Vector3 outColor = rtx::Vector3::Zero();
+
+	for (const auto& light : lights)
+	{
+		Vector3 amb;
+		Vector3 diff;
+		Vector3 spec;
+		Vector3 lightDir;
+		float atten = 1.f;
+
+		Vector3 ambLight = Color(light->GetAmbient()).ToVector();
+		Vector3 diffLight = Color(light->GetDiffuse()).ToVector();
+		Vector3 specLight = Color(light->GetSpecular()).ToVector();
+		const float shine = light->GetShine();
+
+		if (auto pointLight = std::dynamic_pointer_cast<PointLight>(light))
+		{
+			Vector3 vertLight = vert.GetPosition() - pointLight->GetPosition();
+			const float dist = vertLight.Length();
+			lightDir = vertLight * (-1.f / dist);
+			atten = 1.f / (1.f + 0.09f * dist + 0.032f * dist * dist);
+		}
+		else if (auto dirLight = std::dynamic_pointer_cast<DirectionalLight>(light))
+		{
+			lightDir = -(dirLight->GetDirection()).Normal();
+		}
+		else if (auto spotLight = std::dynamic_pointer_cast<SpotLight>(light))
+		{
+			Vector3 vertLight = vert.GetPosition() - spotLight->GetPosition();
+			const float dist = vertLight.Length();
+			lightDir = vertLight * (-1.f / dist);
+
+			const float angle = lightDir.Dot(spotLight->GetDirection().Normal());
+			const float cutOff = std::cos(spotLight->GetCutOff() * PI / 180.f);
+
+			if (angle < cutOff)
+				continue;
+
+			const float spot = std::pow(std::max(angle, 0.f), 8.f);
+			atten = spot / (1.f + 0.09f * dist + 0.032f * dist * dist);
+		}
+
+		amb = ambLight * objColor;
+
+		const float d = std::max(vert.GetNormal().Dot(lightDir), 0.f);
+		diff = diffLight * objColor * d;
+
+		Vector3 viewDir = (camPos - vert.GetPosition()).Normal();
+		Vector3 reflectDir = vert.GetNormal() * (2.f * vert.GetNormal().Dot(lightDir)) - lightDir;
+
+		const float s = std::pow(std::max(viewDir.Dot(reflectDir), 0.f), shine);
+		spec = specLight * s;
+
+		outColor = outColor + (amb + diff + spec) * atten;
+	}
+
+	vert.SetColor(Color(MathUtils::Clamp(outColor.x, 0.f, 1.f), MathUtils::Clamp(outColor.y, 0.f, 1.f), MathUtils::Clamp(outColor.z, 0.f, 1.f)));
+}
+
+void Rasterizer::RenderTriangle(VTriangle triangle, const rtx::Matrix4& model, const std::vector<std::shared_ptr<Light>>& lights, unsigned int color)
 {
 	int width = buffer.GetWidth();
 	int height = buffer.GetHeight();
@@ -116,7 +188,9 @@ void Rasterizer::RenderTriangle(VTriangle triangle, const rtx::Matrix4& model, u
 
 				if (pDepth < sDepth)
 				{
-					Vector3 pColor = Color(RED).ToVector() * u + Color(GREEN).ToVector() * v + Color(BLUE).ToVector() * w;
+					Vector3 pColor = triangle.GetVertexA().GetColor().ToVector() * u 
+						+ triangle.GetVertexB().GetColor().ToVector() * v 
+						+ triangle.GetVertexC().GetColor().ToVector() * w;
 
 					buffer.SetPixelColor(x, y, Color(pColor).ToHex());
 					buffer.SetPixelDepth(x, y, pDepth);

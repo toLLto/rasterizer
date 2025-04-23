@@ -6,9 +6,9 @@ VTriangle::VTriangle(const Vertex& v1, const Vertex& v2, const Vertex& v3)
 	vertices.push_back(v2);
 	vertices.push_back(v3);
 
-	colors.push_back(RED);
-	colors.push_back(RED);
-	colors.push_back(RED);
+	colors.push_back(v1.GetColor());
+	colors.push_back(v2.GetColor());
+	colors.push_back(v3.GetColor());
 
 	indices.push_back(rtx::Vector3(0.f, 1.f, 2.f));
 }
