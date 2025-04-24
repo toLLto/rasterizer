@@ -4,6 +4,7 @@
 
 const unsigned int BLACK = 0xFF000000;
 const unsigned int WHITE = 0xFFFFFFFF;
+const unsigned int GRAY = 0xFF808080;
 const unsigned int RED = 0xFFFF0000;
 const unsigned int GREEN = 0xFF00FF00;
 const unsigned int BLUE = 0xFF0000FF;

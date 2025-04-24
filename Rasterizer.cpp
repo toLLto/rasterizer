@@ -41,11 +41,11 @@ void Rasterizer::RenderMesh(Mesh mesh, const rtx::Matrix4& model, const std::vec
 	{
 		VTriangle vTr = tr;
 
-		LightCalculation(vTr.GetVertexA(), lights);
-		LightCalculation(vTr.GetVertexB(), lights);
-		LightCalculation(vTr.GetVertexC(), lights);
+		LightCalculation(vTr.GetVertexARef(), lights);
+		LightCalculation(vTr.GetVertexBRef(), lights);
+		LightCalculation(vTr.GetVertexCRef(), lights);
 
-		RenderTriangle(vTr, model, lights, RED);
+		RenderTriangle(vTr, model, lights, WHITE);
 	}
 }
 
@@ -109,7 +109,18 @@ void Rasterizer::LightCalculation(Vertex& vert, const std::vector<std::shared_pt
 		outColor = outColor + (amb + diff + spec) * atten;
 	}
 
-	vert.SetColor(Color(MathUtils::Clamp(outColor.x, 0.f, 1.f), MathUtils::Clamp(outColor.y, 0.f, 1.f), MathUtils::Clamp(outColor.z, 0.f, 1.f)));
+	if (lights.empty())
+	{
+		outColor = objColor;
+	}
+
+	Color col = Color(
+		MathUtils::Clamp(outColor.x, 0.f, 1.f), 
+		MathUtils::Clamp(outColor.y, 0.f, 1.f), 
+		MathUtils::Clamp(outColor.z, 0.f, 1.f)
+	);
+
+	vert.SetColor(col);
 }
 
 void Rasterizer::RenderTriangle(VTriangle triangle, const rtx::Matrix4& model, const std::vector<std::shared_ptr<Light>>& lights, unsigned int color)

@@ -12,18 +12,18 @@ Cone::Cone(const float radius, const float height, const int distribution)
 
 		rtx::Vector3 sideNormal = (circlePoint2 - circlePoint1).Cross(rtx::Vector3(0.f, -height, 0.f)).Normal();
 
-		Vertex sideVertA(circlePoint2, sideNormal);
-		Vertex sideVertB(rtx::Vector3(0.f, height, 0.f));
-		Vertex sideVertC(circlePoint1, sideNormal);
+		Vertex sideVertA(circlePoint2, sideNormal, MAGENTA);
+		Vertex sideVertB(rtx::Vector3(0.f, height, 0.f), rtx::Vector3::Up(), MAGENTA);
+		Vertex sideVertC(circlePoint1, sideNormal, MAGENTA);
 		VTriangle sideTriangle(sideVertA, sideVertB, sideVertC);
 		tris.emplace_back(sideTriangle);
 
-		Vertex baseVertA(circlePoint1, sideNormal);
-		Vertex baseVertB(rtx::Vector3::Zero(), -rtx::Vector3::Up());
-		Vertex baseVertC(circlePoint2, sideNormal);
+		Vertex baseVertA(circlePoint1, sideNormal, MAGENTA);
+		Vertex baseVertB(rtx::Vector3::Zero(), -rtx::Vector3::Up(), MAGENTA);
+		Vertex baseVertC(circlePoint2, sideNormal, MAGENTA);
 		VTriangle baseTriangle(baseVertA, baseVertB, baseVertC);
 		tris.emplace_back(baseTriangle);
 	}
 
-	verts.push_back({ rtx::Vector3(0.f, height, 0.f), -rtx::Vector3::Up()});
+	verts.push_back({ rtx::Vector3(0.f, height, 0.f), -rtx::Vector3::Up(), MAGENTA });
 }

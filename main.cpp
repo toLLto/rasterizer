@@ -7,11 +7,14 @@
 #include "Cone.hpp"
 #include "Cylinder.hpp"
 #include "Torus.hpp"
+#include "PointLight.hpp"
+#include "SpotLight.hpp"
+#include "DirectionalLight.hpp"
 
 using namespace std;
 
-const unsigned int WIDTH = 256;
-const unsigned int HEIGHT = 256;
+const unsigned int WIDTH = 512;
+const unsigned int HEIGHT = 512;
 
 const float fov = 120.f;
 const float aspect = 1.f;
@@ -52,8 +55,30 @@ int main()
     meshes.emplace_back(torus);
     models.emplace_back(torusModel);
 
+    std::vector<std::shared_ptr<Light>> lights = 
+    {
+        std::make_shared<PointLight>(PointLight(
+            Color(0.2f, 0.2f, 0.2f),
+            Color(0.8f, 0.8f, 0.8f),
+            Color(0.1f, 0.1f, 0.1f),
+            0.f,
+            rtx::Vector3(1.f, 1.f, 0.f)
+        )),
 
-    rasterizer.Render(meshes, models, BLACK);
+        std::make_shared<SpotLight>(SpotLight(
+            Color(0.2f, 0.2f, 0.2f),
+            Color(0.8f, 0.8f, 0.8f),
+            Color(0.1f, 0.1f, 0.1f),
+            0.f,
+            rtx::Vector3(0.f, 0.5f, 0.f),
+            -rtx::Vector3::Up(),
+            50.f
+        )),
+
+        std::make_shared<DirectionalLight>(DirectionalLight())
+    };
+
+    rasterizer.Render(meshes, models, lights, GRAY);
 
     return 0;
 }

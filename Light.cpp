@@ -2,8 +2,8 @@
 
 Light::Light()
 {
-	ambient = Color(0.4f, 0.4f, 0.4f);
-	diffuse = Color(0.6f, 0.6f, 0.6f);
+	ambient = Color(0.1f, 0.1f, 0.1f);
+	diffuse = Color(0.8f, 0.8f, 0.8f);
 	specular = Color(0.1f, 0.1f, 0.1f);
 	shine = 0.f;
 }

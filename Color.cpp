@@ -15,10 +15,10 @@ Color::Color(int r, int g, int b, int a)
 
 Color::Color(float r, float g, float b, float a)
 {
-	r = static_cast<unsigned char>(rtx::MathUtils::Clamp(r, 0.0f, 1.0f) * 255);
-	g = static_cast<unsigned char>(rtx::MathUtils::Clamp(g, 0.0f, 1.0f) * 255);
-	b = static_cast<unsigned char>(rtx::MathUtils::Clamp(b, 0.0f, 1.0f) * 255);
-	a = static_cast<unsigned char>(rtx::MathUtils::Clamp(a, 0.0f, 1.0f) * 255);
+	this->r = static_cast<unsigned char>(rtx::MathUtils::Clamp(r, 0.0f, 1.0f) * 255);
+	this->g = static_cast<unsigned char>(rtx::MathUtils::Clamp(g, 0.0f, 1.0f) * 255);
+	this->b = static_cast<unsigned char>(rtx::MathUtils::Clamp(b, 0.0f, 1.0f) * 255);
+	this->a = static_cast<unsigned char>(rtx::MathUtils::Clamp(a, 0.0f, 1.0f) * 255);
 }
 
 Color::Color(unsigned int hex)

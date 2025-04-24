@@ -16,7 +16,7 @@ public:
 
 	rtx::Vector3 GetPosition();
 	rtx::Vector3 GetNormal();
-	Color GetColor();
+	Color GetColor() const;
 
 	void SetPosition(const rtx::Vector3& v);
 	void SetNormal(const rtx::Vector3& v);

@@ -15,7 +15,7 @@ rtx::Vector3 Vertex::GetNormal()
 	return normal;
 }
 
-Color Vertex::GetColor()
+Color Vertex::GetColor() const
 {
 	return color;
 }
