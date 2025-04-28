@@ -12,17 +12,17 @@ Rasterizer::Rasterizer(unsigned int width, unsigned int height, float fov, float
 {
 }
 
-void Rasterizer::Render(std::vector<Mesh>& meshes, const std::vector<rtx::Matrix4>& models, const std::vector<std::shared_ptr<Light>>& lights, unsigned int backgroundColor)
+void Rasterizer::Render(std::vector<Renderable>& renderables, const std::vector<std::shared_ptr<Light>>& lights, unsigned int backgroundColor)
 {
 	buffer.SetBufferColorFill(backgroundColor);
 	buffer.SetBufferDepthFill(FLT_MAX);
 
-	for (int i = 0; i < meshes.size(); ++i)
+	for (int i = 0; i < renderables.size(); ++i)
 	{
-		RenderMesh(meshes[i], models[i], lights);
+		RenderMesh(renderables[i], lights);
 	}
 
-	TGA::Save("miagk_8.tga", buffer.GetColorBuffer(), buffer.GetWidth(), buffer.GetHeight());
+	TGA::Save("miagk_9.tga", buffer.GetColorBuffer(), buffer.GetWidth(), buffer.GetHeight());
 }
 
 void Rasterizer::ClearBufferColor(unsigned int color)
@@ -35,95 +35,25 @@ void Rasterizer::ClearBufferDepth(float depth)
 	buffer.SetBufferDepthFill(depth);
 }
 
-void Rasterizer::RenderMesh(Mesh mesh, const rtx::Matrix4& model, const std::vector<std::shared_ptr<Light>>& lights)
+void Rasterizer::RenderMesh(Renderable renderable, const std::vector<std::shared_ptr<Light>>& lights)
 {
-	for (VTriangle& tr : mesh.GetTris())
+	for (VTriangle& tr : renderable.mesh.GetTris())
 	{
 		VTriangle vTr = tr;
 
-		LightCalculation(vTr.GetVertexARef(), lights);
-		LightCalculation(vTr.GetVertexBRef(), lights);
-		LightCalculation(vTr.GetVertexCRef(), lights);
+		if (renderable.enableVertexLighting)
+		{
+			VertexLightCalculation(vTr.GetVertexARef(), renderable.model, lights);
+			VertexLightCalculation(vTr.GetVertexBRef(), renderable.model, lights);
+			VertexLightCalculation(vTr.GetVertexCRef(), renderable.model, lights);
+		}
 
-		RenderTriangle(vTr, model, lights, WHITE);
+		RenderTriangle(vTr, renderable.model, lights, WHITE, renderable.enableVertexLighting);
 	}
 }
 
-void Rasterizer::LightCalculation(Vertex& vert, const std::vector<std::shared_ptr<Light>>& lights)
-{
-	Vector3 objColor = Color(vert.GetColor()).ToVector();
-	Vector3 camPos = rtx::Vector3::Zero();
-	Vector3 outColor = rtx::Vector3::Zero();
-
-	for (const auto& light : lights)
-	{
-		Vector3 amb;
-		Vector3 diff;
-		Vector3 spec;
-		Vector3 lightDir;
-		float atten = 1.f;
-
-		Vector3 ambLight = Color(light->GetAmbient()).ToVector();
-		Vector3 diffLight = Color(light->GetDiffuse()).ToVector();
-		Vector3 specLight = Color(light->GetSpecular()).ToVector();
-		const float shine = light->GetShine();
-
-		if (auto pointLight = std::dynamic_pointer_cast<PointLight>(light))
-		{
-			Vector3 vertLight = vert.GetPosition() - pointLight->GetPosition();
-			const float dist = vertLight.Length();
-			lightDir = vertLight * (-1.f / dist);
-			atten = 1.f / (1.f + 0.09f * dist + 0.032f * dist * dist);
-		}
-		else if (auto dirLight = std::dynamic_pointer_cast<DirectionalLight>(light))
-		{
-			lightDir = -(dirLight->GetDirection()).Normal();
-		}
-		else if (auto spotLight = std::dynamic_pointer_cast<SpotLight>(light))
-		{
-			Vector3 vertLight = vert.GetPosition() - spotLight->GetPosition();
-			const float dist = vertLight.Length();
-			lightDir = vertLight * (-1.f / dist);
-
-			const float angle = lightDir.Dot(spotLight->GetDirection().Normal());
-			const float cutOff = std::cos(spotLight->GetCutOff() * PI / 180.f);
-
-			if (angle < cutOff)
-				continue;
-
-			const float spot = std::pow(std::max(angle, 0.f), 8.f);
-			atten = spot / (1.f + 0.09f * dist + 0.032f * dist * dist);
-		}
-
-		amb = ambLight * objColor;
-
-		const float d = std::max(vert.GetNormal().Dot(lightDir), 0.f);
-		diff = diffLight * objColor * d;
-
-		Vector3 viewDir = (camPos - vert.GetPosition()).Normal();
-		Vector3 reflectDir = vert.GetNormal() * (2.f * vert.GetNormal().Dot(lightDir)) - lightDir;
-
-		const float s = std::pow(std::max(viewDir.Dot(reflectDir), 0.f), shine);
-		spec = specLight * s;
-
-		outColor = outColor + (amb + diff + spec) * atten;
-	}
-
-	if (lights.empty())
-	{
-		outColor = objColor;
-	}
-
-	Color col = Color(
-		MathUtils::Clamp(outColor.x, 0.f, 1.f), 
-		MathUtils::Clamp(outColor.y, 0.f, 1.f), 
-		MathUtils::Clamp(outColor.z, 0.f, 1.f)
-	);
-
-	vert.SetColor(col);
-}
-
-void Rasterizer::RenderTriangle(VTriangle triangle, const rtx::Matrix4& model, const std::vector<std::shared_ptr<Light>>& lights, unsigned int color)
+void Rasterizer::RenderTriangle(VTriangle triangle, const rtx::Matrix4& model, const std::vector<std::shared_ptr<Light>>& lights, 
+	unsigned int color, bool enableVertexLighting)
 {
 	int width = buffer.GetWidth();
 	int height = buffer.GetHeight();
@@ -177,6 +107,30 @@ void Rasterizer::RenderTriangle(VTriangle triangle, const rtx::Matrix4& model, c
 	float uDenominator = 1.f / (bcdy * acdx + cbdx * acdy);
 	float vDenominator = 1.f / (cady * bcdx + acdx * bcdy);
 
+	rtx::Matrix4 normal = rtx::Matrix4::InvertedMatrix(model);
+	normal.Transpose();
+
+	rtx::Vector4 vertAWorldPosition = model * rtx::Vector4(triangle.GetVertexA().GetPosition(), 1.f);
+	rtx::Vector4 vertAWorldNormal = normal * rtx::Vector4(triangle.GetVertexA().GetNormal(), 0.f);
+
+	rtx::Vector4 vertBWorldPosition = model * rtx::Vector4(triangle.GetVertexB().GetPosition(), 1.f);
+	rtx::Vector4 vertBWorldNormal = normal * rtx::Vector4(triangle.GetVertexB().GetNormal(), 0.f);
+
+	rtx::Vector4 vertCWorldPosition = model * rtx::Vector4(triangle.GetVertexC().GetPosition(), 1.f);
+	rtx::Vector4 vertCWorldNormal = normal * rtx::Vector4(triangle.GetVertexC().GetNormal(), 0.f);
+
+	rtx::Vector3 worldNormals[3] = {
+		rtx::Vector3(vertAWorldNormal.x, vertAWorldNormal.y, vertAWorldNormal.z).Normal(),
+		rtx::Vector3(vertBWorldNormal.x, vertBWorldNormal.y, vertBWorldNormal.z).Normal(),
+		rtx::Vector3(vertCWorldNormal.x, vertCWorldNormal.y, vertCWorldNormal.z).Normal()
+	};
+
+	rtx::Vector3 worldPositions[3] = {
+		rtx::Vector3(vertAWorldPosition.x, vertAWorldPosition.y, vertAWorldPosition.z),
+		rtx::Vector3(vertBWorldPosition.x, vertBWorldPosition.y, vertBWorldPosition.z),
+		rtx::Vector3(vertCWorldPosition.x, vertCWorldPosition.y, vertCWorldPosition.z)
+	};
+
 	for (int y = yMin; y < yMax; ++y)
 	{
 		for (int x = xMin; x < xMax; ++x)
@@ -199,9 +153,17 @@ void Rasterizer::RenderTriangle(VTriangle triangle, const rtx::Matrix4& model, c
 
 				if (pDepth < sDepth)
 				{
-					Vector3 pColor = triangle.GetVertexA().GetColor().ToVector() * u 
-						+ triangle.GetVertexB().GetColor().ToVector() * v 
+					Vector3 pColor = triangle.GetVertexA().GetColor().ToVector() * u
+						+ triangle.GetVertexB().GetColor().ToVector() * v
 						+ triangle.GetVertexC().GetColor().ToVector() * w;
+
+					if (!enableVertexLighting)
+					{
+						Vector3 worldPosition = worldPositions[0] * u + worldPositions[1] * v + worldPositions[2] * w;
+						Vector3 worldNormal = (worldNormals[0] * u + worldNormals[1] * v + worldNormals[2] * w).Normal();
+
+						pColor = PixelLightCalculation(worldPosition, worldNormal, pColor, lights);
+					}
 
 					buffer.SetPixelColor(x, y, Color(pColor).ToHex());
 					buffer.SetPixelDepth(x, y, pDepth);
@@ -209,4 +171,162 @@ void Rasterizer::RenderTriangle(VTriangle triangle, const rtx::Matrix4& model, c
 			}
 		}
 	}
+}
+
+void Rasterizer::VertexLightCalculation(Vertex& vert, const rtx::Matrix4& model, const std::vector<std::shared_ptr<Light>>& lights)
+{
+	Vector3 objColor = Color(vert.GetColor()).ToVector();
+	Vector3 camPos = rtx::Vector3(0.f, 0.f, 1.f);
+	Vector3 outColor = rtx::Vector3::Zero();
+
+	Vector4 worldPos = model * rtx::Vector4(vert.GetPosition(), 1.0f);
+	Vector3 worldPosition(worldPos.x, worldPos.y, worldPos.z);
+
+	Matrix4 normalMatrix = rtx::Matrix4::InvertedMatrix(model);
+	normalMatrix.Transpose();
+
+	Vector4 worldNorm = normalMatrix * rtx::Vector4(vert.GetNormal(), 0.0f);
+	Vector3 worldNormal(worldNorm.x, worldNorm.y, worldNorm.z);
+	worldNormal = worldNormal.Normal();
+
+	for (const auto& light : lights)
+	{
+		Vector3 amb;
+		Vector3 diff;
+		Vector3 spec;
+		Vector3 lightDir;
+		float atten = 1.f;
+
+		Vector3 ambLight = Color(light->GetAmbient()).ToVector();
+		Vector3 diffLight = Color(light->GetDiffuse()).ToVector();
+		Vector3 specLight = Color(light->GetSpecular()).ToVector();
+		const float shine = light->GetShine();
+
+		if (auto pointLight = std::dynamic_pointer_cast<PointLight>(light))
+		{
+			Vector3 vertLight = worldPosition - pointLight->GetPosition();
+			const float dist = vertLight.Length();
+			lightDir = vertLight * (-1.f / dist);
+			atten = 1.f / (1.f + 0.09f * dist + 0.032f * dist * dist);
+		}
+		else if (auto dirLight = std::dynamic_pointer_cast<DirectionalLight>(light))
+		{
+			lightDir = -(dirLight->GetDirection()).Normal();
+		}
+		else if (auto spotLight = std::dynamic_pointer_cast<SpotLight>(light))
+		{
+			Vector3 vertLight = worldPosition - spotLight->GetPosition();
+			const float dist = vertLight.Length();
+			lightDir = vertLight * (-1.f / dist);
+
+			const float angle = lightDir.Dot(spotLight->GetDirection().Normal());
+			const float cutOff = std::cos(spotLight->GetCutOff() * PI / 180.f);
+
+			if (angle < cutOff)
+				continue;
+
+			const float spot = std::pow(std::max(angle, 0.f), 12.f);
+			atten = spot / (1.f + 0.09f * dist + 0.032f * dist * dist);
+		}
+
+		amb = ambLight * objColor;
+
+		const float d = std::max(worldNormal.Dot(lightDir), 0.f);
+		diff = diffLight * objColor * d;
+
+		Vector3 viewDir = (camPos - worldPosition).Normal();
+		Vector3 reflectDir = worldNormal * (2.f * worldNormal.Dot(lightDir)) - lightDir;
+
+		const float s = std::pow(std::max(viewDir.Dot(reflectDir), 0.f), shine);
+		spec = specLight * s;
+
+		outColor = outColor + (amb + diff + spec) * atten;
+	}
+
+	if (lights.empty())
+	{
+		outColor = objColor;
+	}
+
+	Color col = Color(
+		MathUtils::Clamp(outColor.x, 0.f, 1.f),
+		MathUtils::Clamp(outColor.y, 0.f, 1.f),
+		MathUtils::Clamp(outColor.z, 0.f, 1.f)
+	);
+
+	vert.SetColor(col);
+}
+
+rtx::Vector3 Rasterizer::PixelLightCalculation(const rtx::Vector3& position, const rtx::Vector3& normal, const rtx::Vector3& color, 
+	const std::vector<std::shared_ptr<Light>>& lights)
+{
+	Vector3 camPos = rtx::Vector3(0.f, 0.f, 1.f);
+	Vector3 outColor = rtx::Vector3::Zero();
+
+	for (const auto& light : lights)
+	{
+		Vector3 amb;
+		Vector3 diff;
+		Vector3 spec;
+		Vector3 lightDir;
+		float atten = 1.f;
+
+		Vector3 ambLight = Color(light->GetAmbient()).ToVector();
+		Vector3 diffLight = Color(light->GetDiffuse()).ToVector();
+		Vector3 specLight = Color(light->GetSpecular()).ToVector();
+		const float shine = light->GetShine();
+
+		if (auto pointLight = std::dynamic_pointer_cast<PointLight>(light))
+		{
+			Vector3 pixelLight = position - pointLight->GetPosition();
+			const float dist = pixelLight.Length();
+			lightDir = pixelLight * (-1.f / dist);
+			atten = 1.f / (1.f + 0.09f * dist + 0.032f * dist * dist);
+		}
+		else if (auto dirLight = std::dynamic_pointer_cast<DirectionalLight>(light))
+		{
+			lightDir = -(dirLight->GetDirection()).Normal();
+		}
+		else if (auto spotLight = std::dynamic_pointer_cast<SpotLight>(light))
+		{
+			Vector3 pixelLight = position - spotLight->GetPosition();
+			const float dist = pixelLight.Length();
+			lightDir = pixelLight * (-1.f / dist);
+
+			const float angle = lightDir.Dot(spotLight->GetDirection().Normal());
+			const float cutOff = std::cos(spotLight->GetCutOff() * PI / 180.f);
+
+			if (angle < cutOff)
+				continue;
+
+			const float spot = std::pow(std::max(angle, 0.f), 12.f);
+			atten = spot / (1.f + 0.09f * dist + 0.032f * dist * dist);
+		}
+
+		amb = ambLight * color;
+
+		const float d = std::max(normal.Dot(lightDir), 0.f);
+		diff = diffLight * color * d;
+
+		Vector3 viewDir = (camPos - position).Normal();
+		Vector3 reflectDir = normal * (2.f * normal.Dot(lightDir)) - lightDir;
+
+		const float s = std::pow(std::max(viewDir.Dot(reflectDir), 0.f), shine);
+		spec = specLight * s;
+
+		outColor = outColor + (amb + diff + spec) * atten;
+	}
+
+	if (lights.empty())
+	{
+		outColor = color;
+	}
+
+	Color col = Color(
+		MathUtils::Clamp(outColor.x, 0.f, 1.f),
+		MathUtils::Clamp(outColor.y, 0.f, 1.f),
+		MathUtils::Clamp(outColor.z, 0.f, 1.f)
+	);
+
+	return col.ToVector();
 }

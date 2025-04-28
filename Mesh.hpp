@@ -4,6 +4,7 @@
 #include "VTriangle.hpp"
 #include "Color.hpp"
 #include "Vertex.hpp"
+#include "RasTerX/include/Matrix4.hpp"
 
 class Mesh
 {
@@ -21,4 +22,14 @@ public:
 	std::vector<VTriangle> GetTris();
 
 	static rtx::Vector3 CirclePoint(const float angle, const float radius, rtx::Vector3 center = rtx::Vector3::Zero());
+};
+
+struct Renderable
+{
+	Mesh mesh;
+	rtx::Matrix4 model;
+	bool enableVertexLighting;
+
+	Renderable(const Mesh& mesh, const rtx::Matrix4& model, bool enableVertexLighting = false)
+		: mesh(mesh), model(model), enableVertexLighting(enableVertexLighting) {}
 };
