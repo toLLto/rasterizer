@@ -10,7 +10,7 @@ PointLight::PointLight(Color ambient, Color diffuse, Color specular, float shine
 {
 }
 
-rtx::Vector3 PointLight::GetPosition()
+rtx::Vector3 PointLight::GetPosition() const
 {
 	return position;
 }

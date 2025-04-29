@@ -13,22 +13,22 @@ Light::Light(Color ambient, Color diffuse, Color specular, float shine)
 {
 }
 
-Color Light::GetAmbient()
+Color Light::GetAmbient() const
 {
 	return ambient;
 }
 
-Color Light::GetDiffuse()
+Color Light::GetDiffuse() const
 {
 	return diffuse;
 }
 
-Color Light::GetSpecular()
+Color Light::GetSpecular() const
 {
 	return specular;
 }
 
-float Light::GetShine()
+float Light::GetShine() const
 {
 	return shine;
 }

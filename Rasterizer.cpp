@@ -204,10 +204,11 @@ void Rasterizer::VertexLightCalculation(Vertex& vert, const rtx::Matrix4& model,
 
 		if (auto pointLight = std::dynamic_pointer_cast<PointLight>(light))
 		{
-			Vector3 vertLight = worldPosition - pointLight->GetPosition();
+			Vector3 vertLight = pointLight->GetPosition() - worldPosition;
 			const float dist = vertLight.Length();
-			lightDir = vertLight * (-1.f / dist);
-			atten = 1.f / (1.f + 0.09f * dist + 0.032f * dist * dist);
+			lightDir = vertLight * (1.f / dist);
+			atten = 1.f / (1.f + 0.01f * dist + 0.001f * dist * dist);
+			atten = std::max(atten, 0.1f);
 		}
 		else if (auto dirLight = std::dynamic_pointer_cast<DirectionalLight>(light))
 		{
@@ -235,9 +236,9 @@ void Rasterizer::VertexLightCalculation(Vertex& vert, const rtx::Matrix4& model,
 		diff = diffLight * objColor * d;
 
 		Vector3 viewDir = (camPos - worldPosition).Normal();
-		Vector3 reflectDir = worldNormal * (2.f * worldNormal.Dot(lightDir)) - lightDir;
+		Vector3 reflectDir = (worldNormal * (2.f * worldNormal.Dot(lightDir))) - lightDir;
 
-		const float s = std::pow(std::max(viewDir.Dot(reflectDir), 0.f), shine);
+		const float s = std::pow(std::max(viewDir.Dot(reflectDir), 0.f), std::max(shine, 1.f));
 		spec = specLight * s;
 
 		outColor = outColor + (amb + diff + spec) * atten;
@@ -263,6 +264,9 @@ rtx::Vector3 Rasterizer::PixelLightCalculation(const rtx::Vector3& position, con
 	Vector3 camPos = rtx::Vector3(0.f, 0.f, 1.f);
 	Vector3 outColor = rtx::Vector3::Zero();
 
+	Vector3 minAmbient(0.1f, 0.1f, 0.1f);
+	outColor = minAmbient * color;
+
 	for (const auto& light : lights)
 	{
 		Vector3 amb;
@@ -278,10 +282,11 @@ rtx::Vector3 Rasterizer::PixelLightCalculation(const rtx::Vector3& position, con
 
 		if (auto pointLight = std::dynamic_pointer_cast<PointLight>(light))
 		{
-			Vector3 pixelLight = position - pointLight->GetPosition();
+			Vector3 pixelLight = /*position - pointLight->GetPosition()*/pointLight->GetPosition() - position;
 			const float dist = pixelLight.Length();
-			lightDir = pixelLight * (-1.f / dist);
-			atten = 1.f / (1.f + 0.09f * dist + 0.032f * dist * dist);
+			lightDir = pixelLight * (1.f / dist);
+			atten = 1.f / (1.f + 0.01f * dist + 0.001f * dist * dist);
+			atten = std::max(atten, 0.1f);
 		}
 		else if (auto dirLight = std::dynamic_pointer_cast<DirectionalLight>(light))
 		{
@@ -309,9 +314,9 @@ rtx::Vector3 Rasterizer::PixelLightCalculation(const rtx::Vector3& position, con
 		diff = diffLight * color * d;
 
 		Vector3 viewDir = (camPos - position).Normal();
-		Vector3 reflectDir = normal * (2.f * normal.Dot(lightDir)) - lightDir;
+		Vector3 reflectDir = (normal * (2.f * normal.Dot(lightDir))) - lightDir;
 
-		const float s = std::pow(std::max(viewDir.Dot(reflectDir), 0.f), shine);
+		const float s = std::pow(std::max(viewDir.Dot(reflectDir), 0.f), std::max(shine, 1.f));
 		spec = specLight * s;
 
 		outColor = outColor + (amb + diff + spec) * atten;
@@ -319,7 +324,7 @@ rtx::Vector3 Rasterizer::PixelLightCalculation(const rtx::Vector3& position, con
 
 	if (lights.empty())
 	{
-		outColor = color;
+		outColor = minAmbient * color + color * 0.5f;
 	}
 
 	Color col = Color(

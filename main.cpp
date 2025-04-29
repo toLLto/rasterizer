@@ -63,11 +63,11 @@ int main()
     std::vector<std::shared_ptr<Light>> lights = 
     {
         std::make_shared<PointLight>(PointLight(
-            Color(0.2f, 0.2f, 0.2f),
-            Color(0.8f, 0.8f, 0.8f),
-            Color(0.1f, 0.1f, 0.1f),
-            0.f,
-            rtx::Vector3(0.f, 0.f, 1.f)
+            Color(0.3f, 0.3f, 0.3f),
+            Color(1.f, 1.f, 1.f),
+            Color(0.7f, 0.7f, 0.7f),
+            32.f,
+            rtx::Vector3(0.f, 0.f, 8.f)
         )),
 
         /*std::make_shared<SpotLight>(SpotLight(

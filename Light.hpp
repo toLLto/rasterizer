@@ -17,9 +17,9 @@ public:
 
 	virtual ~Light() = default;
 
-	Color GetAmbient();
-	Color GetDiffuse();
-	Color GetSpecular();
-	float GetShine();
+	Color GetAmbient() const;
+	Color GetDiffuse() const;
+	Color GetSpecular() const;
+	float GetShine() const;
 };
 
