@@ -15,6 +15,11 @@ unsigned int Buffer::GetPixelColor(unsigned int x, unsigned int y) const
 	return colorBuffer[x + width * y];
 }
 
+unsigned int Buffer::GetPixelColor(unsigned int index) const
+{
+	return colorBuffer[index];
+}
+
 void Buffer::SetPixelColor(unsigned int x, unsigned int y, unsigned int color)
 {
 	if (x < 0 || x >= width || y < 0 || y >= height)

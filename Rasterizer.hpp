@@ -27,8 +27,8 @@ public:
 
 private:
 	void RenderMesh(Renderable renderable, const std::vector<std::shared_ptr<Light>>& lights);
-	void RenderTriangle(VTriangle triangle, const rtx::Matrix4& model, const std::vector<std::shared_ptr<Light>>& lights,
-		unsigned int color, bool enableVertexLighting = true);
+	void RenderTriangle(VTriangle triangle, Buffer texture, const rtx::Matrix4& model, const std::vector<std::shared_ptr<Light>>& lights,
+		unsigned int color, bool enableVertexLighting = true, bool isLit = true);
 
 	void VertexLightCalculation(Vertex& vert, const rtx::Matrix4& model, const std::vector<std::shared_ptr<Light>>& lights);
 	rtx::Vector3 PixelLightCalculation(const rtx::Vector3& position, const rtx::Vector3& normal, const rtx::Vector3& color, 

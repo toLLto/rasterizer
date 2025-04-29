@@ -5,6 +5,7 @@
 #include "Color.hpp"
 #include "Vertex.hpp"
 #include "RasTerX/include/Matrix4.hpp"
+#include "Buffer.hpp"
 
 class Mesh
 {
@@ -27,9 +28,11 @@ public:
 struct Renderable
 {
 	Mesh mesh;
+	Buffer texture;
 	rtx::Matrix4 model;
 	bool enableVertexLighting;
+	bool isLit;
 
-	Renderable(const Mesh& mesh, const rtx::Matrix4& model, bool enableVertexLighting = false)
-		: mesh(mesh), model(model), enableVertexLighting(enableVertexLighting) {}
+	Renderable(const Mesh& mesh, const Buffer& texture, const rtx::Matrix4& model, bool enableVertexLighting = false, bool isLit = true)
+		: mesh(mesh), texture(texture), model(model), enableVertexLighting(enableVertexLighting), isLit(isLit) {}
 };

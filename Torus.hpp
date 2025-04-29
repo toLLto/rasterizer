@@ -19,4 +19,6 @@ private:
 	rtx::Vector3 TorusPoint(const float R, const float r, const float phi, const float theta);
 
 	rtx::Vector3 CalculateNormal(const rtx::Vector3& point, const float R, const float r);
+
+	rtx::Vector2 TexCoords(float majorAngle, float minorAngle, int texWidth, int texHeight);
 };

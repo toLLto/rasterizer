@@ -15,22 +15,29 @@ Torus::Torus(const float majorRadius, const float minorRadius, const int majorSe
             float theta1 = j * thetaStep;   // Current angle around torus
             float theta2 = (j + 1) * thetaStep; // Next angle around torus
 
+            int texWidth = 1;
+            int texHeight = 1;
+
             // Calculate the four corners of our quad
             rtx::Vector3 point1 = TorusPoint(majorRadius, minorRadius, phi1, theta1);
-            Vertex vertex1(point1, CalculateNormal(point1, majorRadius, minorRadius), CYAN);
+            Vertex vertex1(point1, CalculateNormal(point1, majorRadius, minorRadius), WHITE);
+            rtx::Vector2 tex1 = TexCoords(theta1, phi1, texWidth, texHeight);
 
             rtx::Vector3 point2 = TorusPoint(majorRadius, minorRadius, phi1, theta2);
-            Vertex vertex2(point2, CalculateNormal(point2, majorRadius, minorRadius), CYAN);
+            Vertex vertex2(point2, CalculateNormal(point2, majorRadius, minorRadius), WHITE);
+            rtx::Vector2 tex2 = TexCoords(theta2, phi1, texWidth, texHeight);
 
             rtx::Vector3 point3 = TorusPoint(majorRadius, minorRadius, phi2, theta2);
-            Vertex vertex3(point3, CalculateNormal(point3, majorRadius, minorRadius), CYAN);
+            Vertex vertex3(point3, CalculateNormal(point3, majorRadius, minorRadius), WHITE);
+            rtx::Vector2 tex3 = TexCoords(theta2, phi2, texWidth, texHeight);
 
             rtx::Vector3 point4 = TorusPoint(majorRadius, minorRadius, phi2, theta1);
-            Vertex vertex4(point4, CalculateNormal(point4, majorRadius, minorRadius), CYAN);
+            Vertex vertex4(point4, CalculateNormal(point4, majorRadius, minorRadius), WHITE);
+            rtx::Vector2 tex4 = TexCoords(theta1, phi2, texWidth, texHeight);
 
             // Create two triangles from the quad
-            VTriangle triangle1(vertex2, vertex1, vertex3);
-            VTriangle triangle2(vertex3, vertex1, vertex4);
+            VTriangle triangle1(vertex2, vertex1, vertex3, tex2, tex1, tex3);
+            VTriangle triangle2(vertex3, vertex1, vertex4, tex3, tex1, tex4);
 
             tris.emplace_back(triangle1);
             tris.emplace_back(triangle2);
@@ -77,4 +84,15 @@ rtx::Vector3 Torus::CalculateNormal(const rtx::Vector3& point, const float R, co
 
     // Return normalized vector
     return normal.Normal();
+}
+
+rtx::Vector2 Torus::TexCoords(float majorAngle, float minorAngle, int texWidth, int texHeight)
+{
+    float u = majorAngle / (2 * PI);
+    float v = minorAngle / (2 * PI);
+
+    //u /= texWidth;
+    //v /= texHeight;
+
+    return rtx::Vector2(u, v);
 }

@@ -19,30 +19,57 @@ Cylinder::Cylinder(const float radius, const float height, const int radialSegme
 
 
 		// Wall square (Two tris)
-		Vertex sideVertA(baseCirclePoint2, sideNormal2, YELLOW);
-		Vertex sideVertB(topCirclePoint2, sideNormal2, YELLOW);
-		Vertex sideVertC(baseCirclePoint1, sideNormal1, YELLOW);
-		Vertex sideVertD(topCirclePoint1, sideNormal1, YELLOW);
+		Vertex sideVertA(baseCirclePoint2, sideNormal2, WHITE);
+		Vertex sideVertB(topCirclePoint2, sideNormal2, WHITE);
+		Vertex sideVertC(baseCirclePoint1, sideNormal1, WHITE);
+		Vertex sideVertD(topCirclePoint1, sideNormal1, WHITE);
 
-		VTriangle sideTriangle1(sideVertB, sideVertA, sideVertC);
-		VTriangle sideTriangle2(sideVertB, sideVertC, sideVertD);
+		VTriangle sideTriangle1(
+			sideVertB, sideVertA, sideVertC,
+			TexCoords(sideVertB.GetPosition().x, sideVertB.GetPosition().y, sideVertB.GetPosition().z, height),
+			TexCoords(sideVertA.GetPosition().x, sideVertA.GetPosition().y, sideVertA.GetPosition().z, height),
+			TexCoords(sideVertC.GetPosition().x, sideVertC.GetPosition().y, sideVertC.GetPosition().z, height)
+		);
+		VTriangle sideTriangle2(
+			sideVertB, sideVertC, sideVertD,
+			TexCoords(sideVertB.GetPosition().x, sideVertB.GetPosition().y, sideVertB.GetPosition().z, height),
+			TexCoords(sideVertC.GetPosition().x, sideVertC.GetPosition().y, sideVertC.GetPosition().z, height),
+			TexCoords(sideVertD.GetPosition().x, sideVertD.GetPosition().y, sideVertD.GetPosition().z, height)
+		);
 
 		tris.emplace_back(sideTriangle1);
 		tris.emplace_back(sideTriangle2);
 
 		// Base
 		rtx::Vector3 down = rtx::Vector3::Up() * -1;
-		Vertex baseVertA(baseCirclePoint1, down, YELLOW);
-		Vertex baseVertB(rtx::Vector3::Zero(), down, YELLOW);
-		Vertex baseVertC(baseCirclePoint2, down, YELLOW);
-		VTriangle baseTriangle(baseVertA, baseVertB, baseVertC);
+		Vertex baseVertA(baseCirclePoint1, down, WHITE);
+		Vertex baseVertB(rtx::Vector3::Zero(), down, WHITE);
+		Vertex baseVertC(baseCirclePoint2, down, WHITE);
+		VTriangle baseTriangle(baseVertA, baseVertB, baseVertC,
+			TexCoords(baseVertA.GetPosition().x, baseVertA.GetPosition().y, baseVertA.GetPosition().z, height),
+			TexCoords(baseVertB.GetPosition().x, baseVertB.GetPosition().y, baseVertB.GetPosition().z, height),
+			TexCoords(baseVertC.GetPosition().x, baseVertC.GetPosition().y, baseVertC.GetPosition().z, height)
+		);
 		tris.emplace_back(baseTriangle);
 
 		// Top
-		Vertex topVertA(topCirclePoint1, rtx::Vector3::Up(), YELLOW);
-		Vertex topVertB(rtx::Vector3(0.f, height, 0.f), rtx::Vector3::Up(), YELLOW);
-		Vertex topVertC(topCirclePoint2, rtx::Vector3::Up(), YELLOW);
-		VTriangle topTriangle(topVertA, topVertB, topVertC);
+		Vertex topVertA(topCirclePoint1, rtx::Vector3::Up(), WHITE);
+		Vertex topVertB(rtx::Vector3(0.f, height, 0.f), rtx::Vector3::Up(), WHITE);
+		Vertex topVertC(topCirclePoint2, rtx::Vector3::Up(), WHITE);
+		VTriangle topTriangle(topVertA, topVertB, topVertC,
+			TexCoords(topVertA.GetPosition().x, topVertA.GetPosition().y, topVertA.GetPosition().z, height),
+			TexCoords(topVertB.GetPosition().x, topVertB.GetPosition().y, topVertB.GetPosition().z, height),
+			TexCoords(topVertC.GetPosition().x, topVertC.GetPosition().y, topVertC.GetPosition().z, height)
+		);
 		tris.emplace_back(topTriangle);
 	}
+}
+
+rtx::Vector2 Cylinder::TexCoords(float x, float y, float z, float height)
+{
+	float phi = atan2f(z, x);
+	float u = phi / (2 * PI) + 0.5f;
+	float v = (y / height) + 0.5f;
+
+	return rtx::Vector2(u, v);
 }

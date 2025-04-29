@@ -144,6 +144,7 @@
     <ClCompile Include="RasTerX\src\Ray.cpp" />
     <ClCompile Include="RasTerX\src\Sphere.cpp" />
     <ClCompile Include="RasTerX\src\Triangle.cpp" />
+    <ClCompile Include="RasTerX\src\Vector2.cpp" />
     <ClCompile Include="RasTerX\src\Vector3.cpp" />
     <ClCompile Include="RasTerX\src\Vector4.cpp" />
     <ClCompile Include="SpotLight.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="RasTerX\include\Ray.hpp" />
     <ClInclude Include="RasTerX\include\Sphere.hpp" />
     <ClInclude Include="RasTerX\include\Triangle.hpp" />
+    <ClInclude Include="RasTerX\include\Vector2.hpp" />
     <ClInclude Include="RasTerX\include\Vector3.hpp" />
     <ClInclude Include="RasTerX\include\Vector4.hpp" />
     <ClInclude Include="SpotLight.hpp" />

@@ -22,7 +22,7 @@ void Rasterizer::Render(std::vector<Renderable>& renderables, const std::vector<
 		RenderMesh(renderables[i], lights);
 	}
 
-	TGA::Save("miagk_9.tga", buffer.GetColorBuffer(), buffer.GetWidth(), buffer.GetHeight());
+	TGA::Save("miagk_10.tga", buffer.GetColorBuffer(), buffer.GetWidth(), buffer.GetHeight());
 }
 
 void Rasterizer::ClearBufferColor(unsigned int color)
@@ -48,12 +48,12 @@ void Rasterizer::RenderMesh(Renderable renderable, const std::vector<std::shared
 			VertexLightCalculation(vTr.GetVertexCRef(), renderable.model, lights);
 		}
 
-		RenderTriangle(vTr, renderable.model, lights, WHITE, renderable.enableVertexLighting);
+		RenderTriangle(vTr, renderable.texture, renderable.model, lights, WHITE, renderable.enableVertexLighting, renderable.isLit);
 	}
 }
 
-void Rasterizer::RenderTriangle(VTriangle triangle, const rtx::Matrix4& model, const std::vector<std::shared_ptr<Light>>& lights, 
-	unsigned int color, bool enableVertexLighting)
+void Rasterizer::RenderTriangle(VTriangle triangle, Buffer texture, const rtx::Matrix4& model, 
+	const std::vector<std::shared_ptr<Light>>& lights, unsigned int color, bool enableVertexLighting, bool isLit)
 {
 	int width = buffer.GetWidth();
 	int height = buffer.GetHeight();
@@ -148,6 +148,36 @@ void Rasterizer::RenderTriangle(VTriangle triangle, const rtx::Matrix4& model, c
 				float v = (cady * scdx + acdx * scdy) * vDenominator;
 				float w = 1.f - u - v;
 
+				Vector2 uv1 = triangle.GetTexA();
+				Vector2 uv2 = triangle.GetTexB();
+				Vector2 uv3 = triangle.GetTexC();
+
+				Vector2 uv = uv1 * u + uv2 * v + uv3 * w;
+
+				if (uv.x < 0.0f) uv.x = 0.0f;
+				if (uv.x > 1.0f) uv.x = 1.0f;
+				if (uv.y < 0.0f) uv.y = 0.0f;
+				if (uv.y > 1.0f) uv.y = 1.0f;
+
+				int tex_x = static_cast<int>(uv.x * (texture.GetWidth() - 1));
+				int tex_y = static_cast<int>(uv.y * (texture.GetHeight() - 1));
+				int index = tex_x + tex_y * texture.GetWidth();
+
+				if (index >= 0 && index < texture.GetWidth() * texture.GetHeight()) {
+					color = texture.GetPixelColor(index);
+				}
+				else {
+					color = 0xFFFFFF; // Default white if out of bounds
+				}
+
+				Vector3 textureColor = Vector3(
+					((color >> 16) & 0xFF) / 255.0f,
+					((color >> 8) & 0xFF) / 255.0f,
+					(color & 0xFF) / 255.0f
+				);
+
+				Vector3 finalColor = textureColor;
+
 				float sDepth = buffer.GetPixelDepth(x, y);
 				float pDepth = u * az + v * bz + w * cz;
 
@@ -157,12 +187,22 @@ void Rasterizer::RenderTriangle(VTriangle triangle, const rtx::Matrix4& model, c
 						+ triangle.GetVertexB().GetColor().ToVector() * v
 						+ triangle.GetVertexC().GetColor().ToVector() * w;
 
-					if (!enableVertexLighting)
+					if (!enableVertexLighting && !isLit)
 					{
 						Vector3 worldPosition = worldPositions[0] * u + worldPositions[1] * v + worldPositions[2] * w;
 						Vector3 worldNormal = (worldNormals[0] * u + worldNormals[1] * v + worldNormals[2] * w).Normal();
 
-						pColor = PixelLightCalculation(worldPosition, worldNormal, pColor, lights);
+						pColor = PixelLightCalculation(worldPosition, worldNormal, pColor, lights) * textureColor;
+					}
+					else if (enableVertexLighting && !isLit)
+					{
+						pColor = pColor * textureColor;
+					}
+					else
+					{
+						Vector3 color = textureColor * u + textureColor * v + textureColor * w;
+
+						pColor = color * textureColor;
 					}
 
 					buffer.SetPixelColor(x, y, Color(pColor).ToHex());
